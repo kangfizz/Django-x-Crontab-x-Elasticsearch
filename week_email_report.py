@@ -1,7 +1,7 @@
 #目的: 撰寫一個每個禮拜定時寄信的系統
 #從es取資料 (這周對話數(ok),這周對話時間,總對話數(ok),總對話時間(ok))
-#利用crontab定時執行 0 0 * * MON /var/www/html/MI_COM_django/django_venv/bin/python3 /var/www/html/MI_COM_django/MIwebsite/week_email_report.py >> /home/leo77705/vimbackup.log 2>&1
-# (可從 /home/leo77705/vimbackup.log 察看結果 & error.log)
+#利用crontab定時執行 0 0 * * MON /venv_path/bin/python3 /file_position/week_email_report.py >> /home/user_name/vimbackup.log 2>&1
+# (可從 /home/user_name/vimbackup.log 察看結果 & error.log)
 #注意,遠端主機的基本timezone可能跟您預設的django時區不同
 #無論email地址是否偽造都可以傳出去
 import os
@@ -18,7 +18,7 @@ es= Elasticsearch()
 now = datetime.now()
 dateline = (now - timedelta(days=7)).strftime("%Y-%m-%d")+" 至 "+now.strftime("%Y-%m-%d")
 #先找尋熱門對話前3(一周)    
-s1=es.search(index="manager_platform_talk", body={
+s1=es.search(index="xxx", body={
     "from" : 0, "size" : 0,
     "query": {
      "constant_score" : {
@@ -56,7 +56,7 @@ for it in mes_word_list1:
     
         
 #所有使用者
-s3=es.search(index="manager_platform", body={
+s3=es.search(index="xx", body={
     "from" : 0, "size" : 10000, #可以修超過10000筆
 })
 # len(s3['hits']['hits'])
@@ -74,7 +74,7 @@ for sdict in s3['hits']['hits']:
     else:
         h, m = divmod(m, 60)
         total_t =  "%d小時%02d分%02d秒" % (h, m, s) 
-    s2=es.search(index="manager_platform_talk", body={
+    s2=es.search(index="xxx", body={
         "from" : 0, "size" : 10000, #可以修超過10000筆
         "sort" : [
         { "lastest_time" : {"order" : "desc"}}, #依時間順序排下來(desc依最新)
@@ -122,8 +122,8 @@ for sdict in s3['hits']['hits']:
     html_content='<div style=" width: 650px; "> \
             <div style="border: solid 1px #a6e4e7; display: block; padding: 20px; color: #fc3a52; font-size: 30px; 	font-family: \
             微軟正黑體; border-radius: 20px;">\
-            <img style="margin-left: 30px;height: 80px;margin-right:500px;top: 6px;right: 6px;" src="https://www.ap-mic.com/static/MI_COM_PART/img/MI_icon_black.png" alt=""></img>\
-            【亞太機器智能】每周智能對話報告<br><div style="border: none;font-size: 15px;">(期間:'+dateline+')</div>\
+            <img style="margin-left: 30px;height: 80px;margin-right:500px;top: 6px;right: 6px;" src="" alt=""></img>\
+            【】每周報告<br><div style="border: none;font-size: 15px;">(期間:'+dateline+')</div>\
             </div> \
             <div style="border: solid 1px #a6e4e7; line-height: 50px; display: block; padding: 20px; font-family: \
             微軟正黑體; border-radius: 20px;"> \
@@ -138,16 +138,16 @@ for sdict in s3['hits']['hits']:
             <b>上週對話排行榜(前三名):</b><br>\
             '+mes_html+'\
             <br> \
-            以上如有任何問題，歡迎寫信到 dsjerry2017@gmail.com\
+            以上如有任何問題，歡迎寫信到 xxxxxx@gmail.com\
             <br>\
             <h6>(如果您沒有申請帳號的話,請無視這封信件。)</h6> \
-            <h5>Copyright © 2018 亞太機器智能(AP-MIC).</h5>\
+            <h5>Copyright © 2018 xxxxxx(xxx).</h5>\
             </div></div>'
     if  sdict['_source']['account'] == "123@gmail.com":
-        towho = "leo77705@gmail.com"
+        towho = "xxxx@gmail.com"
     else:
         towho = sdict['_source']['account']
 
-    msg=EmailMultiAlternatives('【亞太機器智能AP-MIC】每周智能對話報告('+dateline+')',"信箱驗證",'亞太機器智能', to=[towho])
+    msg=EmailMultiAlternatives('【】每周報告('+dateline+')',"信箱驗證",'xxx', to=[towho])
     msg.attach_alternative(html_content, "text/html")
     msg.send()
